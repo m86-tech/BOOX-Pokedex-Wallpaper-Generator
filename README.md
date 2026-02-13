@@ -2,7 +2,7 @@
 
 A lightweight, client-side web tool designed to generate optimized lock screen wallpapers for E-Ink tablets (Boox, Remarkable, Kindle, Kobo, etc.) using dynamic data from the [PokéAPI](https://pokeapi.co/).
 
-![Preview](Screenshot.png)
+![Preview](screenshot.png)
 
 ## 🚀 Features
 
