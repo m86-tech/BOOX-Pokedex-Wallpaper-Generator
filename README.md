@@ -43,7 +43,7 @@ Includes pre-configured resolution presets for major E-Ink devices:
 
 ### 1. Running the Tool
 Because this is a single HTML file with no build step, you can run it in two ways:
-* **Online:** [Click here for the live demo]([#](https://m86-tech.github.io/BOOX-Pokedex-Wallpaper-Generator/)) 
+* **Online:** [Click here for the live demo](https://m86-tech.github.io/BOOX-Pokedex-Wallpaper-Generator/) 
 * **Locally:** Simply download `index.html` and double-click it to open in Chrome, Firefox, or Safari.
 
 ### 2. Generating a Wallpaper
