@@ -43,7 +43,7 @@ Includes pre-configured resolution presets for major E-Ink devices:
 
 ### 1. Running the Tool
 Because this is a single HTML file with no build step, you can run it in two ways:
-* **Online:** [Click here for the live demo](#) *(Add your GitHub Pages link here)*
+* **Online:** [Click here for the live demo]([#](https://m86-tech.github.io/BOOX-Pokedex-Wallpaper-Generator/)) 
 * **Locally:** Simply download `index.html` and double-click it to open in Chrome, Firefox, or Safari.
 
 ### 2. Generating a Wallpaper
@@ -69,14 +69,6 @@ Because this is a single HTML file with no build step, you can run it in two way
 
 ### Smart Layout Engine
 The tool uses a relative spacing unit (`s`) derived from the canvas resolution. This ensures that margins, font sizes, and image positions remain proportional whether you are generating an image for a tiny 6-inch screen or a massive 13.3-inch tablet.
-
-```javascript
-// Example of dynamic scaling
-const s = Math.min(cw / 480, ch / 800) * 1.1; 
-const headerMargin = 40 * s;
-
-
-
 
 
 📄 Credits & License
