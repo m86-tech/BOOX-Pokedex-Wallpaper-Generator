@@ -71,7 +71,7 @@ Because this is a single HTML file with no build step, you can run it in two way
 The tool uses a relative spacing unit (`s`) derived from the canvas resolution. This ensures that margins, font sizes, and image positions remain proportional whether you are generating an image for a tiny 6-inch screen or a massive 13.3-inch tablet.
 
 
-📄 Credits & License
+## 📄 Credits & License
 Code: MIT License. Free to fork and modify.
 
 Data & Assets: Pokémon content and materials are trademarks and copyrights of Nintendo, Creatures Inc., and GAME FREAK inc. This tool is fan-made and not affiliated with Nintendo.
