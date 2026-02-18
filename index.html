@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>POKEDEX WALLPAPER (Symmetrical Layout)</title>
+    <title>POKEDEX Wallpaper Generator</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=VT323&family=Pixelify+Sans:wght@400..700&display=swap" rel="stylesheet">
@@ -112,7 +112,7 @@
     <div class="layout-wrapper">
         
         <div class="controls">
-            <h1>POKEDEX Wallpaper Tool</h1>
+            <h1>Boox Wallpaper Tool</h1>
             
             <div class="input-row">
                 <div style="flex-grow: 1;">
@@ -344,8 +344,6 @@
             } else {
                 let w = parseInt(document.getElementById('customW').value);
                 let h = parseInt(document.getElementById('customH').value);
-                
-                // Fallback and constraints to prevent NaN/Crash
                 if (isNaN(w) || w < 100) w = 100; if (w > 4000) w = 4000;
                 if (isNaN(h) || h < 100) h = 100; if (h > 4000) h = 4000;
                 dim1 = w; dim2 = h;
@@ -559,7 +557,7 @@
                 drawTypePills(data, cw, typesY, s, pillBg, pillText, fontName, useBold);
                 currentY = typesY + (18 * s); 
 
-                // Line 1: 15*s margin
+                // Line 1: Use Uniform Margin (15*s)
                 const line1Margin = 15 * s; 
                 const line1Y = currentY + line1Margin;
                 ctx.lineWidth = 3 * s; ctx.strokeStyle = ink; ctx.beginPath();
@@ -587,19 +585,22 @@
 
                 const evoMargin = 55 * s; 
                 const evoCenterY = currentY + evoMargin;
-                await drawEvo(evo, cw, evoCenterY, s, ink, useBW, fontName, useBold);
                 
-                // ADJUSTMENT: Restore advance to 65*s
-                currentY = evoCenterY + (65*s); 
+                // Pass target name to drawEvo for Branching Fix
+                await drawEvo(evo, cw, evoCenterY, s, ink, useBW, fontName, useBold, data.name);
+                
+                // ADJUSTMENT: 15px Buffer (~80*s advance from Center Y)
+                // CenterY -> Name Text (+45s) -> Font Height (+20s) -> Buffer (+15s) = 80s
+                currentY = evoCenterY + (80*s); 
 
-                // Line 2: 15*s margin (Uniform)
-                const line2Margin = 15 * s; 
+                // Line 2: 10*s margin (From Untitled.html logic)
+                const line2Margin = 10 * s; 
                 const line2Y = currentY + line2Margin;
                 ctx.beginPath();
                 ctx.moveTo(30 * s, line2Y); ctx.lineTo(cw - (30 * s), line2Y); ctx.stroke();
                 currentY = line2Y;
 
-                // Footer: 25*s margin (From Untitled.html)
+                // Footer: 25*s margin (From Untitled.html logic)
                 const footerMargin = 25 * s;
                 drawInfoPanel(data, species, cw, currentY + footerMargin, s, ink, infoMode, fontName, useBold);
 
@@ -685,34 +686,61 @@
             }
         }
 
-        // --- FIXED DRAW EVO WITH RESTORED "UNTITLED" OFFSET ---
-        async function drawEvo(data, w, y, s, color, useBW, fontName, useBold) {
-            let chain = data.chain; let forms = [];
-            forms.push({ name: chain.species.name, url: chain.species.url, text: null }); 
-            
-            if(chain.evolves_to.length > 0) {
-                let second = chain.evolves_to[0];
-                let details2 = second.evolution_details[0]; 
-                let text2 = getEvolutionText(details2);
-                forms.push({ name: second.species.name, url: second.species.url, text: text2 });
-                if(second.evolves_to.length > 0) {
-                    let third = second.evolves_to[0];
-                    let details3 = third.evolution_details[0];
-                    let text3 = getEvolutionText(details3);
-                    forms.push({ name: third.species.name, url: third.species.url, text: text3 });
+        // --- BRANCHING EVO FIX IMPLEMENTATION ---
+        function findChainPath(chain, targetName) {
+            if (chain.species.name === targetName) {
+                return [chain];
+            }
+            for (let i = 0; i < chain.evolves_to.length; i++) {
+                const subPath = findChainPath(chain.evolves_to[i], targetName);
+                if (subPath) {
+                    return [chain, ...subPath];
                 }
             }
+            return null;
+        }
+
+        async function drawEvo(data, w, y, s, color, useBW, fontName, useBold, targetName) {
+            // Find correct branching path
+            let path = findChainPath(data.chain, targetName);
+            
+            // Fallback for base forms or non-branching results
+            if (!path) {
+                path = [];
+                let curr = data.chain;
+                while (curr) {
+                    path.push(curr);
+                    curr = curr.evolves_to.length > 0 ? curr.evolves_to[0] : null;
+                }
+            }
+
+            let forms = [];
+            for (let i = 0; i < Math.min(path.length, 3); i++) {
+                let link = path[i];
+                let details = null;
+                if (i > 0) {
+                    details = link.evolution_details[0]; 
+                }
+                
+                forms.push({
+                    name: link.species.name,
+                    url: link.species.url,
+                    text: getEvolutionText(details)
+                });
+            }
+
             ctx.textAlign = "center"; ctx.textBaseline = "top"; ctx.font = `${20*s}px '${fontName}'`;
             const segW = w / forms.length;
             const weight = useBold ? "bold " : "";
             
-            // ADJUSTMENT: Restore offset to 15*s (from Untitled.html)
+            // ADJUSTMENT: Use exact value from Untitled.html (15*s)
             const spriteTopOffset = 15 * s;
 
             for(let i=0; i<forms.length; i++) {
                 const f = forms[i];
                 const cx = (segW * i) + (segW/2);
                 
+                // Smart Lookup
                 const speciesRes = await fetch(f.url);
                 const speciesData = await speciesRes.json();
                 const defaultVariety = speciesData.varieties.find(v => v.is_default);
